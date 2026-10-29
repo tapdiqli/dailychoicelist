@@ -2,7 +2,6 @@
 import { RouterView, useRoute } from 'vue-router'
 import { watch } from 'vue'
 import AgeGate from '@/components/AgeGate.vue'
-import CookieBanner from '@/components/CookieBanner.vue'
 import ComplianceBar from '@/components/ComplianceBar.vue'
 import SiteHeader from '@/components/SiteHeader.vue'
 import SiteFooter from '@/components/SiteFooter.vue'
