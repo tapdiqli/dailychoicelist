@@ -37,7 +37,6 @@ watch(
       <RouterView />
     </main>
     <SiteFooter />
-    <CookieBanner />
     <DisclosureModal />
   </div>
 </template>

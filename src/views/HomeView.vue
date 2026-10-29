@@ -1,10 +1,33 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
+import { computed } from 'vue'
+import { RouterLink, useRoute } from 'vue-router'
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
 import CasinoCard from '@/components/CasinoCard.vue'
 import { CASINOS } from '@/data/casinos'
+import { ALT_CASINOS } from '@/data/altCasinos'
 import { FAQS } from '@/data/faqs'
 import { LINKS } from '@/data/site'
+
+const route = useRoute()
+
+// Bing Ads click id. Visitors arriving from a Bing click (msclkid longer
+// than 6 chars) see the alternate brand set, with their msclkid appended
+// to each link as `visit_id` for tracking.
+const msclkid = computed(() => {
+  const raw = route.query.msclkid
+  const value = Array.isArray(raw) ? raw[0] : raw
+  return typeof value === 'string' ? value : ''
+})
+
+const showAltCasinos = computed(() => msclkid.value.length > 6)
+
+const displayedCasinos = computed(() => {
+  if (!showAltCasinos.value) return CASINOS
+  return ALT_CASINOS.map((casino) => ({
+    ...casino,
+    href: `${casino.href}${encodeURIComponent(msclkid.value)}`,
+  }))
+})
 
 const homeFaqIds = ['licensed', 'kyc', 'wagering', 'ranking', 'tools'] as const
 const homeFaqs = homeFaqIds
@@ -29,34 +52,28 @@ const reasons = [
   <div>
     <section class="bg-mesh border-b border-line">
       <div class="mx-auto max-w-7xl px-4 py-7 md:py-9">
-        <h1 class="max-w-4xl font-display text-3xl font-bold leading-tight tracking-tight md:text-4xl">
-          A measured UK casino shortlist for 2026
+        <h1 class="max-w-4xl font-display text-2xl font-bold leading-tight tracking-tight md:text-4xl">
+          Top Online UK Casinos 2026
         </h1>
-        <p class="mt-3 max-w-3xl text-base leading-relaxed text-muted md:text-lg">
+        <p class="mt-3 hidden max-w-3xl text-base leading-relaxed text-muted md:block md:text-lg">
           Daily Choice List lines up UKGC-licensed rooms — currently MrQ and Lottomart — so you can compare protected accounts, audited slots, and how each brand actually runs, without wading through an endless directory.
         </p>
         <ul
           class="-mx-4 mt-5 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] snap-x snap-mandatory md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:snap-none [&::-webkit-scrollbar]:hidden"
           aria-label="Site highlights"
         >
-          <li class="snap-start shrink-0 rounded-full border border-line bg-panel px-3 py-2 text-xs font-semibold whitespace-nowrap">UKGC licensed sites only</li>
-          <li class="snap-start shrink-0 rounded-full border border-line bg-panel px-3 py-2 text-xs font-semibold whitespace-nowrap">Independent desk reviews</li>
-          <li class="snap-start shrink-0 rounded-full border border-line bg-panel px-3 py-2 text-xs font-semibold whitespace-nowrap">Re-checked weekly</li>
-          <li class="snap-start shrink-0 rounded-full border border-line bg-panel px-3 py-2 text-xs font-semibold whitespace-nowrap">Written for UK players</li>
-          <li class="snap-start shrink-0 rounded-full border border-danger/40 bg-panel px-3 py-2 text-xs font-semibold whitespace-nowrap">18+ BeGambleAware</li>
+          <li class="snap-start shrink-0 rounded-full border border-line bg-panel px-2.5 py-1.5 text-[11px] font-semibold whitespace-nowrap md:px-3 md:py-2 md:text-xs">Independent desk reviews</li>
+          <li class="snap-start shrink-0 rounded-full border border-line bg-panel px-2.5 py-1.5 text-[11px] font-semibold whitespace-nowrap md:px-3 md:py-2 md:text-xs">Re-checked weekly</li>
+          <li class="snap-start shrink-0 rounded-full border border-line bg-panel px-2.5 py-1.5 text-[11px] font-semibold whitespace-nowrap md:px-3 md:py-2 md:text-xs">Written for UK players</li>
+          <li class="snap-start shrink-0 rounded-full border border-danger/40 bg-panel px-2.5 py-1.5 text-[11px] font-semibold whitespace-nowrap md:px-3 md:py-2 md:text-xs">18+ BeGambleAware</li>
         </ul>
       </div>
     </section>
 
-    <section class="mx-auto max-w-7xl px-4 py-12">
-      <div class="hidden md:block">
-        <h2 class="font-display text-2xl font-extrabold md:text-3xl">Compare UKGC-licensed brands: MrQ and Lottomart</h2>
-        <p class="mt-3 max-w-3xl text-sm leading-relaxed text-muted">
-          Two operators currently sit on our recommended list. Names, scores and the notes that matter are written in full so you can weigh MrQ against Lottomart before you leave this page.
-        </p>
-      </div>
+    <section class="mx-auto max-w-7xl px-4 py-6">
+
       <div class="space-y-4 md:mt-8">
-        <CasinoCard v-for="casino in CASINOS" :key="casino.id" :casino="casino" />
+        <CasinoCard v-for="casino in displayedCasinos" :key="casino.id" :casino="casino" />
       </div>
     </section>
 
